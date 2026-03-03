@@ -82,7 +82,7 @@ endif()
 
 
 if(NOT MSVC)
-    list(APPEND MAIN_LIBS m pthread)
+    list(APPEND MAIN_LIBS m pthread asound)
 endif()
 
 # Custom target to run the executable

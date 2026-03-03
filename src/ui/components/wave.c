@@ -22,38 +22,65 @@ static uint8_t * cbuf;
 
 static void wave_anim_cb(void * var, int32_t v)
 {
-    lv_obj_t * canvas = (lv_obj_t *)var;
-    
-    // Clear canvas
-    lv_canvas_fill_bg(canvas, lv_color_hex(0x020205), LV_OPA_0);
+    // This function is no longer used by lv_anim_t but kept for structure if needed
+}
 
+static void wave_update_timer_cb(lv_timer_t * timer)
+{
+    lv_obj_t * canvas = (lv_obj_t *)lv_timer_get_user_data(timer);
+    
     // Get live audio amplitude
     uint8_t current_amp = audio_sim_get_amplitude();
-    float amp_multiplier = 1.0f + (current_amp / 50.0f); // Scales visuals up to 6x based on volume
     
-    // Draw each wave
-    for(int i = 0; i < NUM_WAVES; i++) {
-        layers[i].phase += layers[i].speed * (1.0f + (current_amp / 100.0f)); // Spin faster when loud
+    // Threshold to decide whether to draw or clear
+    const uint8_t AMPLITUDE_THRESHOLD = 5; 
+    
+    static bool was_drawing = false;
+
+    if (current_amp > AMPLITUDE_THRESHOLD) {
+        // We are "talking", so draw the waves
         
-        for(int x = 0; x < CANVAS_WIDTH; x += 10) { // Step size of 10 for performance
-            float normalized_x = (float)x / CANVAS_WIDTH;
-            // Window function (sine curve) to taper edges towards 0 so it looks like a bounded wave
-            float window = sinf(normalized_x * 3.14159f); 
+        // Clear canvas for new frame
+        lv_canvas_fill_bg(canvas, lv_color_hex(0x020205), LV_OPA_0);
+
+        float amp_multiplier = 1.0f + (current_amp / 50.0f); // Scales visuals based on volume
+        
+        // Draw each wave
+        for(int i = 0; i < NUM_WAVES; i++) {
+            layers[i].phase += layers[i].speed * (1.0f + (current_amp / 100.0f)); // Spin faster when loud
             
-            float y = sinf(x * layers[i].freq + layers[i].phase) * 
-                      layers[i].base_amp * amp_multiplier * window;
+            for(int x = 0; x < CANVAS_WIDTH; x += 10) { // Step size of 10 for performance
+                float normalized_x = (float)x / CANVAS_WIDTH;
+                // Window function (sine curve) to taper edges towards 0
+                float window = sinf(normalized_x * 3.14159f); 
+                
+                float y = sinf(x * layers[i].freq + layers[i].phase) * 
+                          layers[i].base_amp * amp_multiplier * window;
+                
+                layers[i].points[x/10].x = x;
+                layers[i].points[x/10].y = (CANVAS_HEIGHT / 2) + (int)y;
+            }
             
-            layers[i].points[x/10].x = x;
-            layers[i].points[x/10].y = (CANVAS_HEIGHT / 2) + (int)y;
+            lv_layer_t layer;
+            lv_canvas_init_layer(canvas, &layer);
+            
+            line_dsc[i].points = layers[i].points;
+            line_dsc[i].point_cnt = CANVAS_WIDTH / 10;
+            lv_draw_line(&layer, &line_dsc[i]);
+            lv_canvas_finish_layer(canvas, &layer);
         }
         
-        lv_layer_t layer;
-        lv_canvas_init_layer(canvas, &layer);
+        was_drawing = true;
         
-        line_dsc[i].points = layers[i].points;
-        line_dsc[i].point_cnt = CANVAS_WIDTH / 10;
-        lv_draw_line(&layer, &line_dsc[i]);
-        lv_canvas_finish_layer(canvas, &layer);
+    } else {
+        // Silent frame
+        if (was_drawing) {
+            // Clear the canvas once when transitioning to silence to remove lingering waves
+            lv_canvas_fill_bg(canvas, lv_color_hex(0x020205), LV_OPA_0);
+            was_drawing = false;
+        }
+        // If not drawing, we do nothing. The canvas remains transparent/clear.
+        // This saves enormous amount of CPU!
     }
 }
 
@@ -88,15 +115,9 @@ lv_obj_t * ui_wave_create(lv_obj_t * parent)
         line_dsc[i].round_end = 1;
     }
 
-    // Start an infinite animation to drive the drawing
-    lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_var(&a, wave_canvas);
-    lv_anim_set_exec_cb(&a, wave_anim_cb);
-    lv_anim_set_values(&a, 0, 100);
-    lv_anim_set_time(&a, 1000); 
-    lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
-    lv_anim_start(&a);
+    // Replace infinite lv_anim_t with a periodic timer running at ~30 FPS (33ms)
+    // The timer logic will decide whether rendering is needed based on DB threshold.
+    lv_timer_create(wave_update_timer_cb, 33, wave_canvas);
     
     return wave_canvas;
 }
