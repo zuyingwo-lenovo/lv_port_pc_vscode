@@ -18,6 +18,7 @@
 #else
   #include <unistd.h>
   #include <pthread.h>
+  #include <signal.h>
 #endif
 #include "lvgl/lvgl.h"
 #include "lvgl/examples/lv_examples.h"
@@ -67,7 +68,17 @@ int main(int argc, char **argv)
   /* Initialize custom Voice Wave UI */
   ui_init();
 
-  while(1) {
+  int running = 1;
+
+  while(running) {
+    /* If the HAL window is closed or Ctrl+C is pressed, quit */
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+      if(event.type == SDL_QUIT) {
+        running = 0;
+      }
+    }
+
     /* Periodically call the lv_task handler.
      * It could be done in a timer interrupt or an OS task too.*/
     uint32_t sleep_time_ms = lv_timer_handler();
