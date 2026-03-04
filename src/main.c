@@ -13,6 +13,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #ifdef _MSC_VER
   #include <Windows.h>
 #else
@@ -56,8 +58,13 @@
 
 int main(int argc, char **argv)
 {
-  (void)argc; /*Unused*/
-  (void)argv; /*Unused*/
+  const char* tts_device = NULL;
+  for(int i = 1; i < argc; i++) {
+      if(strcmp(argv[i], "--tts-device") == 0 && i + 1 < argc) {
+          tts_device = argv[i+1];
+          i++;
+      }
+  }
 
   /*Initialize LVGL*/
   lv_init();
@@ -69,8 +76,8 @@ int main(int argc, char **argv)
   ui_init();
 
   /* Initialize Agent Pipeline (Hailo SDK, Whisper, LLM) */
-  void agent_pipeline_init(void); // forward declaration since header isn't included here or it could be
-  agent_pipeline_init();
+  void agent_pipeline_init(const char* tts_device); // forward declaration since header isn't included here or it could be
+  agent_pipeline_init(tts_device);
 
   int running = 1;
 

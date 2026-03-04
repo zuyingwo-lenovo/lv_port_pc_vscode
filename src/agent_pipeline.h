@@ -12,7 +12,7 @@ typedef enum {
     AGENT_STATE_SPEAKING
 } agent_state_t;
 
-void agent_pipeline_init(void);
+void agent_pipeline_init(const char* tts_device);
 void agent_pipeline_step(void); // Call this periodically from main loop or a thread
 agent_state_t agent_get_state(void);
 const char* agent_get_last_user_text(void);

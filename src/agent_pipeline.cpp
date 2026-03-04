@@ -32,6 +32,7 @@ static bool agent_running = false;
 
 static std::string whisper_hef_path = "/usr/local/hailo/resources/models/hailo10h/Whisper-Base.hef";
 static std::string llm_hef_path = "/usr/local/hailo/resources/models/hailo10h/Qwen2.5-1.5B-Instruct.hef";
+static std::string tts_audio_device = "";
 
 // Helper to lowercase string
 static std::string to_lower(const std::string& s) {
@@ -107,19 +108,32 @@ static void agent_thread_func() {
                             
                             std::cout << "\n[Agent] LLM Generation complete. Sending to TTS..." << std::endl;
                             // 4. TTS Playback
-                            {
+                            {r
                                 std::lock_guard<std::mutex> lock(agent_mutex);
                                 current_state = AGENT_STATE_SPEAKING;
-                            }
-                            // Escape quotes for espeak
+                            }r
+                            // Escape quotes for espeakr
                             std::string safe_response = full_response;
                             size_t pos = 0;
                             while ((pos = safe_response.find("\"", pos)) != std::string::npos) {
                                 safe_response.replace(pos, 1, "\\\"");
                                 pos += 2;
                             }
-                            // Use espeak synchronously
-                            std::string cmd = "espeak \"" + safe_response + "\"";
+                            // Use flite to generate wav and then play with aplay for better ALSA support
+                            std::string safe_device = tts_audio_device;
+                            // Automatically convert hw: to plughw: for resampling support
+                            if (safe_device.find("hw:") == 0) {
+                                safe_device.replace(0, 3, "plughw:");
+                            }
+                            
+                            std::string tmp_wav = "/tmp/voicewave_tts.wav";
+                            std::string cmd = "flite -t \"" + safe_response + "\" -o " + tmp_wav + " && ";
+                            if (!safe_device.empty()) {
+                                cmd += "aplay -D " + safe_device + " -q " + tmp_wav;
+                            } else {cmd
+                                cmd += "aplay -q " + tmp_wav;
+                            }
+                            cmd += " ; rm -f " + tmp_wav;
                             std::cout << "[Agent] Executing TTS: " << cmd << std::endl;
                             system(cmd.c_str());
                             std::cout << "[Agent] TTS finished." << std::endl;
@@ -206,7 +220,11 @@ static void agent_thread_wrapper() {
     agent_thread_func();
 }
 
-extern "C" void agent_pipeline_init(void) {
+extern "C" void agent_pipeline_init(const char* tts_device) {
+    if (tts_device) {
+        tts_audio_device = tts_device;
+        std::cout << "[Agent Init] Custom TTS audio device set to: " << tts_audio_device << std::endl;
+    }
     std::cout << "[Agent Init] Starting background loading thread..." << std::endl;
     agent_running = true;
     agent_thread = std::thread(agent_thread_wrapper);
