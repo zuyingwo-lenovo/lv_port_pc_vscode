@@ -68,6 +68,10 @@ int main(int argc, char **argv)
   /* Initialize custom Voice Wave UI */
   ui_init();
 
+  /* Initialize Agent Pipeline (Hailo SDK, Whisper, LLM) */
+  void agent_pipeline_init(void); // forward declaration since header isn't included here or it could be
+  agent_pipeline_init();
+
   int running = 1;
 
   while(running) {

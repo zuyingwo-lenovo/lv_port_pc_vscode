@@ -8,13 +8,23 @@
 #include <unistd.h>
 
 #define PCM_DEVICE "hw:2,0"
-#define SAMPLE_RATE 44100
+#define SAMPLE_RATE 16000
 #define FRAMES 256
 #define MULTIPLIER 5.0f
 
 static volatile uint8_t current_amplitude = 0;
 static pthread_t audio_thread_id;
 static int is_running = 0;
+
+static float *speech_buffer = NULL;
+static size_t speech_capacity = 0;
+static size_t speech_length = 0;
+static int silence_frames = 0;
+static int is_recording_speech = 0;
+
+static float *ready_speech = NULL;
+static size_t ready_speech_size = 0;
+static pthread_mutex_t speech_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Convert RMS amplitude to 0-255 range based on dB
 static uint8_t rms_to_amplitude(double rms) {
@@ -41,6 +51,7 @@ static void* audio_capture_thread(void* arg) {
     snd_pcm_hw_params_t *params;
     int pcm;
     int16_t buffer[FRAMES * 1]; // 1 channel
+    float fbuffer[FRAMES];
     
     // Open PCM device for recording (capture)
     if ((pcm = snd_pcm_open(&pcm_handle, PCM_DEVICE, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
@@ -75,6 +86,11 @@ static void* audio_capture_thread(void* arg) {
         } else if (pcm < 0) {
             fprintf(stderr, "ERROR: Can't read from PCM device. %s\n", snd_strerror(pcm));
         } else {
+            // Convert to float
+            for (int i = 0; i < pcm; i++) {
+                fbuffer[i] = (float)buffer[i] / 32768.0f;
+            }
+
             // Calculate RMS
             double sum_squares = 0.0;
             for (int i = 0; i < pcm; i++) {
@@ -92,10 +108,53 @@ static void* audio_capture_thread(void* arg) {
             } else if (current_amplitude > target_amp) {
                 current_amplitude -= (current_amplitude - target_amp) / 4 + 1;
             }
+
+            // VAD logic
+            pthread_mutex_lock(&speech_mutex);
+            const uint8_t AMPLITUDE_THRESHOLD = 15; // adjust if too sensitive
+            if (target_amp > AMPLITUDE_THRESHOLD) {
+                if (!is_recording_speech) {
+                    is_recording_speech = 1;
+                    speech_length = 0;
+                    fprintf(stderr, "VAD: Speech started\n");
+                }
+                silence_frames = 0;
+            } else {
+                if (is_recording_speech) {
+                    silence_frames += pcm;
+                    // ~1 second of silence
+                    if (silence_frames >= SAMPLE_RATE) {
+                        is_recording_speech = 0;
+                        fprintf(stderr, "VAD: Speech ended (%zu samples)\n", speech_length);
+                        // Save chunk to ready
+                        if (speech_length > 0 && ready_speech == NULL) {
+                            ready_speech = (float*)malloc(speech_length * sizeof(float));
+                            memcpy(ready_speech, speech_buffer, speech_length * sizeof(float));
+                            ready_speech_size = speech_length;
+                        } else {
+                            // Drop if still processing previous
+                        }
+                    }
+                }
+            }
+
+            if (is_recording_speech) {
+                if (speech_length + pcm > speech_capacity) {
+                    speech_capacity = speech_capacity == 0 ? 16000 * 5 : speech_capacity * 2;
+                    speech_buffer = (float*)realloc(speech_buffer, speech_capacity * sizeof(float));
+                }
+                memcpy(speech_buffer + speech_length, fbuffer, pcm * sizeof(float));
+                speech_length += pcm;
+            }
+            pthread_mutex_unlock(&speech_mutex);
         }
     }
     
     snd_pcm_close(pcm_handle);
+    if (speech_buffer) {
+        free(speech_buffer);
+        speech_buffer = NULL;
+    }
     return NULL;
 }
 
@@ -111,5 +170,26 @@ void audio_sim_init(void) {
 
 uint8_t audio_sim_get_amplitude(void) {
     return current_amplitude;
+}
+
+int audio_sim_is_listening(void) {
+    pthread_mutex_lock(&speech_mutex);
+    int res = is_recording_speech;
+    pthread_mutex_unlock(&speech_mutex);
+    return res;
+}
+
+int audio_sim_get_speech(float **out_buffer, size_t *out_size) {
+    pthread_mutex_lock(&speech_mutex);
+    if (ready_speech != NULL) {
+        *out_buffer = ready_speech;
+        *out_size = ready_speech_size;
+        ready_speech = NULL;
+        ready_speech_size = 0;
+        pthread_mutex_unlock(&speech_mutex);
+        return 1;
+    }
+    pthread_mutex_unlock(&speech_mutex);
+    return 0;
 }
 

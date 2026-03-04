@@ -5,8 +5,14 @@ lv_obj_t * time_label;
 
 #include "components/wave.h"
 #include "../audio_sim.h"
+#include "../agent_pipeline.h"
 #include <time.h>
 #include <stdio.h>
+
+static lv_obj_t * status_text;
+static lv_obj_t * user_text;
+static lv_obj_t * agent_text;
+
 
 static void update_time_cb(lv_timer_t * timer)
 {
@@ -32,6 +38,45 @@ static void update_time_cb(lv_timer_t * timer)
              
     lv_label_set_text(time_label, time_str);
 }
+
+static void agent_status_timer_cb(lv_timer_t * timer)
+{
+    agent_state_t state = agent_get_state();
+    
+    switch (state) {
+        case AGENT_STATE_WAITING:
+            lv_label_set_text(status_text, "AWAITING WAKE WORD...");
+            lv_obj_set_style_text_color(status_text, lv_color_hex(0x00e5ff), 0);
+            break;
+        case AGENT_STATE_LISTENING:
+            lv_label_set_text(status_text, "LISTENING...");
+            lv_obj_set_style_text_color(status_text, lv_color_hex(0xffaa00), 0);
+            break;
+        case AGENT_STATE_PROCESSING:
+            lv_label_set_text(status_text, "PROCESSING...");
+            lv_obj_set_style_text_color(status_text, lv_color_hex(0xff00ff), 0);
+            break;
+        case AGENT_STATE_SPEAKING:
+            lv_label_set_text(status_text, "SPEAKING...");
+            lv_obj_set_style_text_color(status_text, lv_color_hex(0x00ff00), 0);
+            break;
+    }
+
+    const char* user_str = agent_get_last_user_text();
+    if (user_str && user_str[0] != '\0') {
+        lv_label_set_text_fmt(user_text, "\"%s\"", user_str);
+    } else {
+        lv_label_set_text(user_text, "");
+    }
+
+    const char* agent_str = agent_get_last_agent_text();
+    if (agent_str && agent_str[0] != '\0') {
+        lv_label_set_text(agent_text, agent_str);
+    } else {
+        lv_label_set_text(agent_text, "");
+    }
+}
+
 
 void ui_init(void)
 {
@@ -63,20 +108,42 @@ void ui_init(void)
     update_time_cb(NULL);
     lv_timer_create(update_time_cb, 60000, NULL);
     
-    // Wi-Fi / Status icons mock
-    lv_obj_t * icons_label = lv_label_create(status_bar);
-    lv_label_set_text(icons_label, LV_SYMBOL_WIFI " " LV_SYMBOL_BLUETOOTH);
-    lv_obj_set_style_text_color(icons_label, lv_color_hex(0x9aa0a6), 0);
-    lv_obj_set_style_text_font(icons_label, &lv_font_montserrat_24, 0);
-    lv_obj_align(icons_label, LV_ALIGN_RIGHT_MID, -40, 0);
+    // // Wi-Fi / Status icons mock
+    // lv_obj_t * icons_label = lv_label_create(status_bar);
+    // lv_label_set_text(icons_label, LV_SYMBOL_WIFI " " LV_SYMBOL_BLUETOOTH);
+    // lv_obj_set_style_text_color(icons_label, lv_color_hex(0x9aa0a6), 0);
+    // lv_obj_set_style_text_font(icons_label, &lv_font_montserrat_24, 0);
+    // lv_obj_align(icons_label, LV_ALIGN_RIGHT_MID, -40, 0);
 
     // Pulse Text Status Indicator
-    lv_obj_t * status_text = lv_label_create(ui_Screen_Main);
+    status_text = lv_label_create(ui_Screen_Main);
     lv_label_set_text(status_text, "AWAITING WAKE WORD...");
     lv_obj_set_style_text_color(status_text, lv_color_hex(0x00e5ff), 0);
     lv_obj_set_style_text_font(status_text, &lv_font_montserrat_24, 0);
     // Align directly above the wave canvas
     lv_obj_align(status_text, LV_ALIGN_CENTER, 0, -150);
+
+    // User Text Indicator
+    user_text = lv_label_create(ui_Screen_Main);
+    lv_label_set_text(user_text, "");
+    lv_obj_set_style_text_color(user_text, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_font(user_text, &lv_font_montserrat_24, 0);
+    lv_obj_set_width(user_text, 800);
+    lv_label_set_long_mode(user_text, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_align(user_text, LV_ALIGN_CENTER, 0, -80);
+
+    // Agent Text Indicator
+    agent_text = lv_label_create(ui_Screen_Main);
+    lv_label_set_text(agent_text, "");
+    lv_obj_set_style_text_color(agent_text, lv_color_hex(0x00ff00), 0);
+    lv_obj_set_style_text_font(agent_text, &lv_font_montserrat_24, 0);
+    lv_obj_set_width(agent_text, 1400);
+    lv_label_set_long_mode(agent_text, LV_LABEL_LONG_WRAP);
+    lv_obj_align(agent_text, LV_ALIGN_CENTER, 0, 150);
+
+    // Timer to update Agent Status
+    lv_timer_create(agent_status_timer_cb, 100, NULL);
+
 
     // Add Wave Visualization
     ui_wave_create(ui_Screen_Main);
