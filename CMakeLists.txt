@@ -60,10 +60,9 @@ set(WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 find_package(SDL2 REQUIRED)
 
 # Find HailoRT
-find_library(HAILORT_LIB NAMES hailort)
-find_path(HAILORT_INCLUDE_DIR NAMES hailo/hailort.h)
-if(NOT HAILORT_LIB OR NOT HAILORT_INCLUDE_DIR)
-    message(FATAL_ERROR "HailoRT not found. Please ensure it is installed.")
+if(NOT WIN32)
+    find_package(HailoRT REQUIRED)
+    find_path(HAILORT_INCLUDE_DIR NAMES hailo/hailort.h PATHS "C:/Program Files/HailoRT/include")
 endif()
 
 # Add compile definitions based on the selected options
@@ -89,7 +88,7 @@ endif()
 
 
 if(NOT MSVC)
-    list(APPEND MAIN_LIBS m pthread asound)
+    list(APPEND MAIN_LIBS m pthread)
 endif()
 
 # Custom target to run the executable
@@ -150,8 +149,13 @@ endif()
 
 add_executable(main ${MAIN_SOURCES})
 target_compile_definitions(main PRIVATE LV_CONF_INCLUDE_SIMPLE)
-target_include_directories(main PRIVATE ${HAILORT_INCLUDE_DIR})
-target_link_libraries(main ${MAIN_LIBS} ${HAILORT_LIB} stdc++)
+
+if(NOT WIN32)
+    target_include_directories(main PRIVATE ${HAILORT_INCLUDE_DIR})
+    target_link_libraries(main ${MAIN_LIBS} libhailort stdc++)
+else()
+    target_link_libraries(main ${MAIN_LIBS})
+endif()
 
 # On Windows, GUI applications do not show a console by default,
 # which hides log output. This ensures a console is available for logging.
