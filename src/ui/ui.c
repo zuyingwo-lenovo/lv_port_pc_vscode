@@ -106,19 +106,19 @@ static void agent_status_timer_cb(lv_timer_t * timer)
     
     switch (state) {
         case AGENT_STATE_WAITING:
-            lv_label_set_text(status_text, "TRIAX ACTIVE | WAITING");
+            lv_label_set_text(status_text, " ACTIVE | WAITING");
             lv_obj_set_style_text_color(status_text, lv_color_hex(0x00e5ff), 0);
             break;
         case AGENT_STATE_LISTENING:
-            lv_label_set_text(status_text, "TRIAX ACTIVE | LISTENING");
+            lv_label_set_text(status_text, " ACTIVE | LISTENING");
             lv_obj_set_style_text_color(status_text, lv_color_hex(0xffaa00), 0);
             break;
         case AGENT_STATE_PROCESSING:
-            lv_label_set_text(status_text, "TRIAX ACTIVE | PROCESSING");
+            lv_label_set_text(status_text, " ACTIVE | PROCESSING");
             lv_obj_set_style_text_color(status_text, lv_color_hex(0xff00ff), 0);
             break;
         case AGENT_STATE_SPEAKING:
-            lv_label_set_text(status_text, "TRIAX ACTIVE | SPEAKING");
+            lv_label_set_text(status_text, " ACTIVE | SPEAKING");
             lv_obj_set_style_text_color(status_text, lv_color_hex(0x00ff00), 0);
             break;
     }
@@ -200,7 +200,7 @@ void ui_init(const char* capture_device)
 
     // Status / Mode Label
     status_text = lv_label_create(left_panel);
-    lv_label_set_text(status_text, "TRIAX ACTIVE | WAITING");
+    lv_label_set_text(status_text, " ACTIVE | WAITING");
     lv_obj_set_style_text_color(status_text, lv_color_hex(0x00e5ff), 0);
     lv_obj_set_style_text_font(status_text, &lv_font_montserrat_16, 0);
     lv_obj_align(status_text, LV_ALIGN_BOTTOM_LEFT, 20, -20);
@@ -229,7 +229,7 @@ void ui_init(const char* capture_device)
     lv_obj_t * astra_brand = lv_label_create(center_panel);
     lv_label_set_text(astra_brand, "T R I A X");
     lv_obj_set_style_text_color(astra_brand, lv_color_hex(0x94a3b8), 0);
-    lv_obj_set_style_text_font(astra_brand, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_font(astra_brand, &lv_font_montserrat_36, 0);
     lv_obj_align(astra_brand, LV_ALIGN_BOTTOM_MID, 0, -20);
 
     // Add Wave Visualization to center panel

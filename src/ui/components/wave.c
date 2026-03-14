@@ -32,55 +32,59 @@ static void wave_update_timer_cb(lv_timer_t * timer)
     // Get live audio amplitude
     uint8_t current_amp = audio_sim_get_amplitude();
     
-    // Threshold to decide whether to draw or clear
-    const uint8_t AMPLITUDE_THRESHOLD = 5; 
+    // Threshold to decide between "Active" and "Ambient" mode
+    const uint8_t ACTIVE_THRESHOLD = 8; 
     
-    static bool was_drawing = false;
+    // Always clear for new frame
+    lv_canvas_fill_bg(canvas, lv_color_hex(0x020205), LV_OPA_0);
 
-    if (current_amp > AMPLITUDE_THRESHOLD) {
-        // We are "talking", so draw the waves
-        
-        // Clear canvas for new frame
-        lv_canvas_fill_bg(canvas, lv_color_hex(0x020205), LV_OPA_0);
+    float amp_multiplier;
+    float base_opacity;
+    uint8_t line_width;
 
-        float amp_multiplier = 1.0f + (current_amp / 50.0f); // Scales visuals based on volume
-        
-        // Draw each wave
-        for(int i = 0; i < NUM_WAVES; i++) {
-            layers[i].phase += layers[i].speed * (1.0f + (current_amp / 100.0f)); // Spin faster when loud
-            
-            for(int x = 0; x < CANVAS_WIDTH; x += 10) { // Step size of 10 for performance
-                float normalized_x = (float)x / CANVAS_WIDTH;
-                // Window function (sine curve) to taper edges towards 0
-                float window = sinf(normalized_x * 3.14159f); 
-                
-                float y = sinf(x * layers[i].freq + layers[i].phase) * 
-                          layers[i].base_amp * amp_multiplier * window;
-                
-                layers[i].points[x/10].x = x;
-                layers[i].points[x/10].y = (CANVAS_HEIGHT / 2) + (int)y;
-            }
-            
-            lv_layer_t layer;
-            lv_canvas_init_layer(canvas, &layer);
-            
-            line_dsc[i].points = layers[i].points;
-            line_dsc[i].point_cnt = CANVAS_WIDTH / 10;
-            lv_draw_line(&layer, &line_dsc[i]);
-            lv_canvas_finish_layer(canvas, &layer);
-        }
-        
-        was_drawing = true;
-        
+    if (current_amp > ACTIVE_THRESHOLD) {
+        // ACTIVE MODE: Large, vibrant waves
+        amp_multiplier = 1.0f + (current_amp / 40.0f);
+        base_opacity = 1.0f;
+        line_width = 3;
     } else {
-        // Silent frame
-        if (was_drawing) {
-            // Clear the canvas once when transitioning to silence to remove lingering waves
-            lv_canvas_fill_bg(canvas, lv_color_hex(0x020205), LV_OPA_0);
-            was_drawing = false;
+        // AMBIENT MODE: Faint flat line with tiny ripples
+        // Even if amp is 0, we show a baseline ripple for "standby" feel
+        amp_multiplier = 0.05f + (current_amp / 100.0f); 
+        base_opacity = 0.3f;
+        line_width = 2;
+    }
+    
+    // Draw each wave
+    for(int i = 0; i < NUM_WAVES; i++) {
+        // Higher speed and phase shift during active mode
+        float speed_factor = (current_amp > ACTIVE_THRESHOLD) ? (1.0f + (current_amp / 80.0f)) : 0.5f;
+        layers[i].phase += layers[i].speed * speed_factor;
+        
+        for(int x = 0; x < CANVAS_WIDTH; x += 10) {
+            float normalized_x = (float)x / CANVAS_WIDTH;
+            float window = sinf(normalized_x * 3.14159f); 
+            
+            float y = sinf(x * layers[i].freq + layers[i].phase) * 
+                      layers[i].base_amp * amp_multiplier * window;
+            
+            layers[i].points[x/10].x = x;
+            layers[i].points[x/10].y = (CANVAS_HEIGHT / 2) + (int)y;
         }
-        // If not drawing, we do nothing. The canvas remains transparent/clear.
-        // This saves enormous amount of CPU!
+        
+        lv_layer_t layer;
+        lv_canvas_init_layer(canvas, &layer);
+        
+        line_dsc[i].points = layers[i].points;
+        line_dsc[i].point_cnt = CANVAS_WIDTH / 10;
+        line_dsc[i].width = line_width;
+        line_dsc[i].opa = (lv_opa_t)(255 * base_opacity);
+        
+        // Final line in active mode should be even more prominent
+        if(i == 3 && current_amp > ACTIVE_THRESHOLD) line_dsc[i].opa = 255; 
+
+        lv_draw_line(&layer, &line_dsc[i]);
+        lv_canvas_finish_layer(canvas, &layer);
     }
 }
 
