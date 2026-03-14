@@ -1,4 +1,5 @@
 #include "hal.h"
+#include <SDL.h>
 
 
 lv_display_t * sdl_hal_init(int32_t w, int32_t h)
@@ -6,7 +7,26 @@ lv_display_t * sdl_hal_init(int32_t w, int32_t h)
 
   lv_group_set_default(lv_group_create());
 
+  // lv_display_t * disp = lv_sdl_window_create(w, h);
+  
   lv_display_t * disp = lv_sdl_window_create(w, h);
+  
+  // Disable window borders for kiosk/fullscreen embedded feel
+  SDL_Window * window = lv_sdl_window_get_window(disp);
+  SDL_SetWindowBordered(window, SDL_FALSE);
+
+  // Find the exact monitor that matches our resolution (1920x480)
+  int num_displays = SDL_GetNumVideoDisplays();
+  for(int i = 0; i < num_displays; i++) {
+      SDL_Rect display_bounds;
+      if (SDL_GetDisplayBounds(i, &display_bounds) == 0) {
+          if (display_bounds.w == w && display_bounds.h == h) {
+              // We found the perfect screen match, move the borderless window there
+              SDL_SetWindowPosition(window, display_bounds.x, display_bounds.y);
+              break;
+          }
+      }
+  }
 
   lv_indev_t * mouse = lv_sdl_mouse_create();
   lv_indev_set_group(mouse, lv_group_get_default());

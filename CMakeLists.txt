@@ -59,6 +59,13 @@ set(WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 # Find and include SDL2 library
 find_package(SDL2 REQUIRED)
 
+# Find HailoRT
+find_library(HAILORT_LIB NAMES hailort)
+find_path(HAILORT_INCLUDE_DIR NAMES hailo/hailort.h)
+if(NOT HAILORT_LIB OR NOT HAILORT_INCLUDE_DIR)
+    message(FATAL_ERROR "HailoRT not found. Please ensure it is installed.")
+endif()
+
 # Add compile definitions based on the selected options
 add_compile_definitions($<$<BOOL:${LV_USE_DRAW_SDL}>:LV_USE_DRAW_SDL=1>)
 add_compile_definitions($<$<BOOL:${LV_USE_LIBPNG}>:LV_USE_LIBPNG=1>)
@@ -77,12 +84,12 @@ if(USE_FREERTOS)
     list(APPEND MAIN_SOURCES src/freertos_main.c src/freertos/freertos_posix_port.c ${FREERTOS_SOURCES})
     list(APPEND MAIN_LIBS freertos_config freertos_kernel)
 else()
-    list(APPEND MAIN_SOURCES src/main.c)
+    list(APPEND MAIN_SOURCES src/main.c src/ui/ui.c src/audio_sim.c src/ui/components/wave.c src/agent_pipeline.cpp)
 endif()
 
 
 if(NOT MSVC)
-    list(APPEND MAIN_LIBS m pthread)
+    list(APPEND MAIN_LIBS m pthread asound)
 endif()
 
 # Custom target to run the executable
@@ -143,7 +150,8 @@ endif()
 
 add_executable(main ${MAIN_SOURCES})
 target_compile_definitions(main PRIVATE LV_CONF_INCLUDE_SIMPLE)
-target_link_libraries(main ${MAIN_LIBS})
+target_include_directories(main PRIVATE ${HAILORT_INCLUDE_DIR})
+target_link_libraries(main ${MAIN_LIBS} ${HAILORT_LIB} stdc++)
 
 # On Windows, GUI applications do not show a console by default,
 # which hides log output. This ensures a console is available for logging.

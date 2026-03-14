@@ -13,11 +13,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #ifdef _MSC_VER
   #include <Windows.h>
 #else
   #include <unistd.h>
   #include <pthread.h>
+  #include <signal.h>
 #endif
 #include "lvgl/lvgl.h"
 #include "lvgl/examples/lv_examples.h"
@@ -25,6 +28,7 @@
 #include <SDL.h>
 
 #include "hal/hal.h"
+#include "ui/ui.h"
 
 /*********************
  *      DEFINES
@@ -42,7 +46,7 @@
  *  STATIC VARIABLES
  **********************/
 
-/**********************
+/**************sudo apt update********
  *      MACROS
  **********************/
 
@@ -54,24 +58,42 @@
 
 int main(int argc, char **argv)
 {
-  (void)argc; /*Unused*/
-  (void)argv; /*Unused*/
+  const char* tts_device = NULL;
+  const char* capture_device = NULL;
+  for(int i = 1; i < argc; i++) {
+      if(strcmp(argv[i], "--tts-device") == 0 && i + 1 < argc) {
+          tts_device = argv[i+1];
+          i++;
+      } else if(strcmp(argv[i], "--capture-device") == 0 && i + 1 < argc) {
+          capture_device = argv[i+1];
+          i++;
+      }
+  }
 
   /*Initialize LVGL*/
   lv_init();
 
   /*Initialize the HAL (display, input devices, tick) for LVGL*/
-  sdl_hal_init(320, 480);
+  sdl_hal_init(1920, 480);
 
-  /* Run the default demo */
-  /* To try a different demo or example, replace this with one of: */
-  /* - lv_demo_benchmark(); */
-  /* - lv_demo_stress(); */
-  /* - lv_example_label_1(); */
-  /* - etc. */
-  lv_demo_widgets();
+  /* Initialize custom Voice Wave UI */
+  ui_init(capture_device);
 
-  while(1) {
+  /* Initialize Agent Pipeline (Hailo SDK, Whisper, LLM) */
+  void agent_pipeline_init(const char* tts_device); // forward declaration since header isn't included here or it could be
+  agent_pipeline_init(tts_device);
+
+  int running = 1;
+
+  while(running) {
+    /* If the HAL window is closed or Ctrl+C is pressed, quit */
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+      if(event.type == SDL_QUIT) {
+        running = 0;
+      }
+    }
+
     /* Periodically call the lv_task handler.
      * It could be done in a timer interrupt or an OS task too.*/
     uint32_t sleep_time_ms = lv_timer_handler();
@@ -95,3 +117,4 @@ int main(int argc, char **argv)
  *   STATIC FUNCTIONS
  **********************/
 
+ 

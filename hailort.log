@@ -1,0 +1,37 @@
+[2026-03-04 17:17:53.638] [51590] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-04 17:17:53.676] [51590] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-04 17:21:43.868] [51918] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-04 17:21:43.895] [51918] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-04 17:33:24.411] [52752] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-04 17:33:24.437] [52752] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-04 17:38:46.211] [53281] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-04 17:38:46.236] [53281] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-04 17:40:40.942] [53524] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-04 17:40:40.968] [53524] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-04 17:48:36.711] [54066] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-04 17:48:36.737] [54066] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 16:45:04.184] [7365] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 16:45:04.232] [7365] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 16:46:57.041] [7723] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 16:46:57.066] [7723] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 17:12:49.068] [10937] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 17:12:49.102] [10937] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 17:13:53.251] [11149] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 17:13:53.276] [11149] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 17:18:04.595] [12077] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 17:18:04.621] [12077] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 17:19:36.472] [12073] [HailoRT] [error] [session_wrapper.cpp:43] [read] CHECK_SUCCESS failed with status=HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:19:36.473] [12073] [HailoRT] [critical] [speech2text.cpp:127] [~Impl] Failed to execute Speech2Text release request with status HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:19:36.473] [12150] [HailoRT] [error] [session_wrapper.cpp:43] [read] CHECK_SUCCESS failed with status=HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:19:36.473] [12150] [HailoRT] [error] [llm.cpp:823] [send_read_request] CHECK_SUCCESS failed with status=HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:19:36.473] [12150] [HailoRT] [error] [llm.cpp:739] [token_reader_thread] Failed to send read request: HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:19:36.474] [12073] [HailoRT] [critical] [vdevice_hrpc_client.cpp:132] [~VDeviceHrpcClient] Failed to destroy VDevice! status = HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:19:36.474] [12073] [HailoRT] [critical] [device_hrpc_client.cpp:93] [~DeviceHrpcClient] Failed to destroy Device! status = HAILO_COMMUNICATION_CLOSED(62)
+[2026-03-14 17:23:36.912] [2496] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 17:23:36.966] [2496] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 18:12:52.033] [11327] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 18:12:52.064] [11327] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 18:27:38.908] [2894] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 18:27:38.965] [2894] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
+[2026-03-14 18:48:05.022] [10422] [HailoRT] [info] [vdevice.cpp:227] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2026-03-14 18:48:05.054] [10422] [HailoRT] [info] [device.cpp:53] [Device] OS Version: Linux 6.12.62+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.62-1+rpt1 (2025-12-18) aarch64
