@@ -3,8 +3,8 @@
 #include <math.h>
 
 #define CANVAS_WIDTH 1080
-#define CANVAS_HEIGHT 240
-#define NUM_WAVES 4
+#define CANVAS_HEIGHT 440
+#define NUM_WAVES 6
 
 typedef struct {
     lv_color_t color;
