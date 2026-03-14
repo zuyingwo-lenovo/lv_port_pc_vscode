@@ -11,6 +11,8 @@ lv_obj_t * date_label;
 #include <stdio.h>
 #include <string.h>
 
+LV_FONT_DECLARE(font_montserrat_72);
+
 static lv_obj_t * status_text;
 static lv_obj_t * chat_list;
 
@@ -187,13 +189,13 @@ void ui_init(const char* capture_device)
     // Time Label
     time_label = lv_label_create(left_panel);
     lv_obj_set_style_text_color(time_label, lv_color_hex(0xf8fafc), 0);
-    lv_obj_set_style_text_font(time_label, &lv_font_montserrat_48, 0);
+    lv_obj_set_style_text_font(time_label, &font_montserrat_72, 0);
     lv_obj_align(time_label, LV_ALIGN_CENTER, 0, -20);
     
     // Date Label
     date_label = lv_label_create(left_panel);
     lv_obj_set_style_text_color(date_label, lv_color_hex(0x94a3b8), 0);
-    lv_obj_set_style_text_font(date_label, &lv_font_montserrat_20, 0);
+    lv_obj_set_style_text_font(date_label, &lv_font_montserrat_32, 0);
     lv_obj_align(date_label, LV_ALIGN_CENTER, 0, 30);
 
     // Status / Mode Label

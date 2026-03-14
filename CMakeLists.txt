@@ -84,7 +84,7 @@ if(USE_FREERTOS)
     list(APPEND MAIN_SOURCES src/freertos_main.c src/freertos/freertos_posix_port.c ${FREERTOS_SOURCES})
     list(APPEND MAIN_LIBS freertos_config freertos_kernel)
 else()
-    list(APPEND MAIN_SOURCES src/main.c src/ui/ui.c src/audio_sim.c src/ui/components/wave.c src/agent_pipeline.cpp)
+    list(APPEND MAIN_SOURCES src/main.c src/ui/ui.c src/ui/font_montserrat_72.c src/audio_sim.c src/ui/components/wave.c src/agent_pipeline.cpp)
 endif()
 
 
