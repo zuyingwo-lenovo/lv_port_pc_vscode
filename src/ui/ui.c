@@ -10,6 +10,7 @@ lv_obj_t * date_label;
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include <SDL.h>
 
 LV_FONT_DECLARE(font_montserrat_72);
 
@@ -152,11 +153,35 @@ static void agent_status_timer_cb(lv_timer_t * timer)
     }
 }
 
+static void screen_key_event_cb(lv_event_t * e)
+{
+    lv_key_t key = lv_event_get_key(e);
+    SDL_Keymod mod = SDL_GetModState();
+    bool alt = (mod & KMOD_ALT) != 0;
+    
+    // Debug: show all keys received
+    if (key != 0) {
+        printf("[UI DEBUG] Key received: %d (char: '%c'), Alt: %d\n", (int)key, (key >= 32 && key <= 126) ? key : '?', alt);
+    }
+
+    if (alt && (key == 'q' || key == 'Q')) {
+        printf("[UI] Quit requested via keyboard (Alt+Q)\n");
+        agent_request_quit();
+    } else if (alt && (key == 'x' || key == 'X')) {
+        printf("[UI] Abort requested via keyboard (Alt+X)\n");
+        agent_request_abort();
+    }
+}
+
 void ui_init(const char* capture_device)
 {
     // Create main screen
     ui_Screen_Main = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Screen_Main, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(ui_Screen_Main, screen_key_event_cb, LV_EVENT_KEY, NULL);
+    // Ensure screen can receive focus for keys
+    lv_group_add_obj(lv_group_get_default(), ui_Screen_Main);
+    lv_obj_add_state(ui_Screen_Main, LV_STATE_FOCUSED);
 
     // Deep dark background for the modern glass UI look
     lv_obj_set_style_bg_color(ui_Screen_Main, lv_color_hex(0x020205), LV_PART_MAIN | LV_STATE_DEFAULT);

@@ -15,8 +15,34 @@ static std::string last_agent_text = "";
 static std::mutex bridge_mutex;
 static bool bridge_running = false;
 static pthread_t bridge_thread;
+static bool abort_requested = false;
+static bool quit_requested = false;
 
 // --- Implement agent_pipeline.h for the UI to poll ---
+
+extern "C" void agent_request_abort(void) {
+    std::lock_guard<std::mutex> lock(bridge_mutex);
+    abort_requested = true;
+}
+
+extern "C" void agent_request_quit(void) {
+    std::lock_guard<std::mutex> lock(bridge_mutex);
+    quit_requested = true;
+}
+
+extern "C" int agent_poll_abort(void) {
+    std::lock_guard<std::mutex> lock(bridge_mutex);
+    bool res = abort_requested;
+    abort_requested = false;
+    return res ? 1 : 0;
+}
+
+extern "C" int agent_poll_quit(void) {
+    std::lock_guard<std::mutex> lock(bridge_mutex);
+    bool res = quit_requested;
+    quit_requested = false;
+    return res ? 1 : 0;
+}
 
 extern "C" agent_state_t agent_get_state(void) {
     std::lock_guard<std::mutex> lock(bridge_mutex);
