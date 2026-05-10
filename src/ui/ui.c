@@ -86,7 +86,7 @@ static lv_obj_t * create_bubble(bool is_user) {
     
     // Add small title
     lv_obj_t * title = lv_label_create(bubble);
-    lv_label_set_text(title, is_user ? "User" : "Astra");
+    lv_label_set_text(title, is_user ? "User" : "Triax");
     lv_obj_set_style_text_color(title, is_user ? lv_color_hex(0x94a3b8) : lv_color_hex(0x6ee7b7), 0);
     lv_obj_set_style_text_font(title, &lv_font_montserrat_14, 0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, -5);
