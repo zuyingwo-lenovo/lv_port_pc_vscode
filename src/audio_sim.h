@@ -31,6 +31,12 @@ int audio_sim_is_listening(void);
  */
 int audio_sim_get_speech(float **out_buffer, size_t *out_size);
 
+/**
+ * Manually set the amplitude (used by bridge)
+ */
+void audio_sim_set_amplitude(uint8_t amp);
+
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

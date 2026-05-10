@@ -164,7 +164,14 @@ void audio_sim_init(const char* capture_device) {
     if (capture_device) {
         global_capture_device = capture_device;
     }
+    
+    if (strcmp(global_capture_device, "none") == 0) {
+        fprintf(stderr, "audio_sim: Capture disabled (device is 'none')\n");
+        return;
+    }
+
     if (is_running == 0) {
+
         is_running = 1;
         if (pthread_create(&audio_thread_id, NULL, audio_capture_thread, NULL) != 0) {
             fprintf(stderr, "ERROR: Failed to create audio capture thread\n");
@@ -176,6 +183,11 @@ void audio_sim_init(const char* capture_device) {
 uint8_t audio_sim_get_amplitude(void) {
     return current_amplitude;
 }
+
+void audio_sim_set_amplitude(uint8_t amp) {
+    current_amplitude = amp;
+}
+
 
 int audio_sim_is_listening(void) {
     pthread_mutex_lock(&speech_mutex);

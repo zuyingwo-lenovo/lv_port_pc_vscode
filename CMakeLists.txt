@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12.4)
 project(lvgl C CXX)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
 # Set the correct FreeRTOS port for your system (e.g., Posix for WSL)
 set(FREERTOS_PORT GCC_POSIX CACHE STRING "Port for FreeRTOS on Posix environment")
 
@@ -152,6 +155,22 @@ add_executable(main ${MAIN_SOURCES})
 target_compile_definitions(main PRIVATE LV_CONF_INCLUDE_SIMPLE)
 target_include_directories(main PRIVATE ${HAILORT_INCLUDE_DIR})
 target_link_libraries(main ${MAIN_LIBS} ${HAILORT_LIB} stdc++)
+
+# Add shared library for Python integration
+set(BRIDGE_SOURCES 
+    src/gui_bridge.cpp 
+    src/ui/ui.c 
+    src/ui/font_montserrat_72.c 
+    src/audio_sim.c 
+    src/ui/components/wave.c 
+    src/mouse_cursor_icon.c 
+    src/hal/hal.c
+)
+add_library(lvgl_gui SHARED ${BRIDGE_SOURCES})
+target_compile_definitions(lvgl_gui PRIVATE LV_CONF_INCLUDE_SIMPLE)
+target_include_directories(lvgl_gui PRIVATE ${HAILORT_INCLUDE_DIR})
+target_link_libraries(lvgl_gui ${MAIN_LIBS} ${HAILORT_LIB} stdc++)
+
 
 # On Windows, GUI applications do not show a console by default,
 # which hides log output. This ensures a console is available for logging.
